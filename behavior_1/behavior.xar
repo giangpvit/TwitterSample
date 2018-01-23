@@ -1,0 +1,1373 @@
+<?xml version="1.0" encoding="UTF-8" ?><ChoregrapheProject xmlns="http://www.aldebaran-robotics.com/schema/choregraphe/project.xsd" xar_version="3"><Box name="root" id="-1" localization="8" tooltip="Root box of Choregraphe&apos;s behavior. Highest level possible." x="0" y="0"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="TwitterApp/Stop" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/Stop" inner="1" tooltip="TwitterApp/Stop desc" id="4" /><Input name="TwitterApp/View/ShowCamera" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/View/ShowCamera" inner="1" tooltip="TwitterApp/View/ShowCamera desc" id="5" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram scale="118.921"><Box name="Init Setting" id="10" localization="8" tooltip="" x="90" y="43"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Stop Alife Motion" id="22" localization="8" tooltip="Ver.2.0.0&#x0A;This box is to set ALife&apos;s breathing, Basic Awareness, Expressive Listening and Blinkings to off.&#x0A;[option]&#x0A;● Background Strategy&#x0A;Check to stop Alife breathing and Idle Posture.&#x0A;&#x0A;● Expressive Listening&#x0A;Check to stop Expressive motion when pepper listening.&#x0A;&#x0A;● Basic Awareness&#x0A;Check to stop Basic Awareness.&#x0A;&#x0A;● Autonomous Blinking&#x0A;Check to stop Pepper&apos;s Blinking" x="152" y="9"><bitmap>media/images/box/box-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        #~ puts code for box initialization here
+        try:
+            self.awareness = ALProxy("ALBasicAwareness")
+        except:
+            self.awareness = None
+            self.logger.warning("ALBasicAwareness initialization failed.")
+        try:
+            self.autonomousMoves = ALProxy("ALAutonomousMoves")
+        except:
+            self.autonomousMoves = None
+            self.logger.warning("ALAutonomousMoves initialization failed.")
+        try:
+            self.blinking = ALProxy("ALAutonomousBlinking")
+        except:
+            self.blinking = None
+            self.logger.warning("ALAutonomousBlinking initialization failed.")
+
+        self.setExpressive = None
+        self.setBlinking = None
+        pass
+
+    def onUnload(self):
+        #~ExpressiveListening and Blinking can't be set to default by ALife, need to set manual.
+        if (self.setExpressive and self.autonomousMoves):
+            self.autonomousMoves.setExpressiveListeningEnabled(self.setExpressive)
+        if (self.blinking and self.setBlinking):
+            self.blinking.setEnabled(self.setBlinking)
+        self.setExpressive = None
+        self.setBlinking = None
+        pass
+
+    def onInput_onStart(self):
+
+        if (self.getParameter('Background Strategy') and self.autonomousMoves):
+            self.autonomousMoves.setBackgroundStrategy("none")
+            #Stop Breathing and Idle Postrue
+
+        if (self.getParameter('Basic Awareness') and self.awareness):
+            self.awareness.stopAwareness()
+            #Stop Basic Awareness
+
+        if (self.getParameter('Expressive Listening') and self.autonomousMoves):
+            self.setExpressive = self.autonomousMoves.getExpressiveListeningEnabled()
+            self.logger.info("self.setExpressive = " +str(self.setExpressive))
+            self.autonomousMoves.setExpressiveListeningEnabled(False)
+            #Stop Expressive Listening
+
+        if (self.getParameter('Autonomous Blinking') and self.blinking):
+            self.setBlinking = self.blinking.isEnabled()
+            self.logger.info("self.setBlinking = " +str(self.setBlinking))
+            self.blinking.setEnabled(False)
+            #Stop Blinking
+
+        self.onStopped()
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Parameter name="Background Strategy" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="5" /><Parameter name="Expressive Listening" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="6" /><Parameter name="Basic Awareness" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="7" /><Parameter name="Autonomous Blinking" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="" id="8" /></Box><Box name="look up" id="4" localization="8" tooltip="" x="273" y="34"><bitmap>media/images/box/box-timeLine.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="37"><ActuatorList model="juliette"><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="0"><Key frame="37" value="-28.6523" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="0"><Key frame="37" value="2.98828" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="0"><Key frame="37" value="-2.81249" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="0"><Key frame="37" value="0" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="0"><Key frame="37" value="-1.40625" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="0"><Key frame="37" value="-30.2344" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="0"><Key frame="37" value="-69.873" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="1"><Key frame="37" value="0.59051" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="0"><Key frame="37" value="90.1758" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="0"><Key frame="37" value="7.11915" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="0"><Key frame="37" value="0.964409" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="0"><Key frame="37" value="29.6191" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="0"><Key frame="37" value="70.0488" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="1"><Key frame="37" value="0.601933" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="0"><Key frame="37" value="89.8242" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="0"><Key frame="37" value="-7.03126" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="0"><Key frame="37" value="-0.705531" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Set Language" id="9" localization="8" tooltip="Set the language of your robot for the current application. Your robot will speak and understand the selected language as long as your application has focus. Any following call to ALSpeechRecognition (Speech Reco. box for instance), ALTextToSpeech (Say box for instance) or ALDialog will use this language.&#x0A;" x="88" y="255"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        try:
+            self.tts = ALProxy("ALTextToSpeech")
+        except:
+            self.logger.warn("ALTextToSpeech is not available, language setting cannot be applied to speech")
+            self.tts = None
+
+        try:
+            self.asr = ALProxy("ALSpeechRecognition")
+        except:
+            self.logger.warn("ALSpeechRecognition is not available, language setting cannot be applied to recognition")
+            self.asr = None
+
+        try:
+            self.dialog = ALProxy("ALDialog")
+        except:
+            self.logger.warn("ALDialog is not available, language setting cannot be applied to dialog")
+            self.dialog = None
+
+    def onInput_onSet(self):
+        lang = self.getParameter("Language")
+        try:
+            if self.asr:
+                self.asr.setLanguage( self.getParameter("Language") )
+            if self.tts:
+                self.tts.setLanguage( self.getParameter("Language") )
+            if self.dialog:
+                self.dialog.setLanguage( self.getParameter("Language") )
+            if self.tts is None and self.asr is None and self.dialog is None:
+                raise RuntimeError("Cannot set language: neither ALTextToSpeech nor ALSpeechRecognition nor ALDialog is available.")
+            self.onReady()
+        except:
+            error = "Language " + lang + " cannot be set."
+            self.logger.warn(error)
+            self.onError(error)]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onSet" type="1" type_size="1" nature="1" inner="0" tooltip="The data is set when a signal is received on this input." id="2" /><Output name="onReady" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when the data has been set." id="3" /><Output name="onError" type="3" type_size="1" nature="2" inner="0" tooltip="Error output:&#x0A;- triggered if the language asked cannot be set" id="4" /><Parameter name="Language" inherits_from_parent="0" content_type="3" value="Japanese" default_value="English" custom_choice="1" tooltip="Set the language the robot speaks and understands." id="5"><Choice value="Arabic" /><Choice value="Brazilian" /><Choice value="Chinese" /><Choice value="Czech" /><Choice value="Danish" /><Choice value="Dutch" /><Choice value="English" /><Choice value="Finnish" /><Choice value="French" /><Choice value="German" /><Choice value="Greek" /><Choice value="Italian" /><Choice value="Japanese" /><Choice value="Korean" /><Choice value="MandarinTaiwan" /><Choice value="Norwegian" /><Choice value="Polish" /><Choice value="Portuguese" /><Choice value="Russian" /><Choice value="Spanish" /><Choice value="Swedish" /><Choice value="Turkish" /></Parameter><Resource name="Speech" type="Lock" timeout="0" /></Box><Box name="SetPathLibFld" id="5" localization="8" tooltip="プロジェクトの Lib フォルダーに Python パスを通す" x="183" y="137"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        self.pathModified = False
+
+    def onUnload(self):
+        if self.pathModified and self.folderName and self.folderName in sys.path:
+            sys.path.remove(self.folderName)
+        self.folderName = None
+
+    def onInput_onStart(self):
+        appFolder = self.behaviorAbsolutePath().replace(self.behaviorRelativePath(), "")
+        self.folderName = os.path.join(appFolder, "lib")
+        if self.folderName not in sys.path:
+            sys.path.insert(0, self.folderName)
+            self.pathModified = True
+
+        self.onReady()
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="4" /><Output name="onReady" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /></Box><Link inputowner="4" indexofinput="2" outputowner="22" indexofoutput="4" /><Link inputowner="22" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="9" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="5" indexofinput="2" outputowner="0" indexofoutput="2" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Box name="Show App" id="2" localization="8" tooltip="Loads the application on the tablet, if it exists, and displays the webview.&#x0A;&#x0A;V1.0.0&#x0A;" x="276" y="8"><bitmap>media/images/box/root.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        try:
+            self.tabletService = self.session().service("ALTabletService")
+            self.connectId = None
+        except Exception as e:
+            self.onError("ペッパーのタブレットエラーです。。。アプリを終了します")
+            self.logger.error(e)
+
+    def onLoad(self):
+        self.isRunning = False
+
+    def onUnload(self):
+        self.isRunning = False
+        if self.tabletService:
+            self.disconnectListener()
+            self.tabletService.hideWebview()
+            self.tabletService = None
+
+    def disconnectListener(self):
+        if self.connectId:
+            try:
+                self.tabletService.onWifiStatusChange.disconnect(self.connectId)
+                self.connectId = None
+            except Exception as e:
+                self.logger.error(e)
+
+    def _getAbsoluteUrl(self, partial_url):
+        import os
+        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        return "http://%s/apps/%s" %(self.tabletService.robotIp(), subPath.replace(os.path.sep, "/"))
+
+    def onInput_onStart(self):
+        if self.isRunning:
+            return # already running, nothing to do
+        self.isRunning = True
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        #self.tabletService = self._getTabletService()
+        appName = self.packageUid()
+        state = False
+        if appName:
+            if self.tabletService:
+                if self.tabletService.loadApplication(appName):
+                    self.logger.info("Successfully set application: %s" % appName)
+
+                    wifiStatus = self.tabletService.getWifiStatus()
+                    if wifiStatus == 'CONNECTED':
+                        self.tabletService.showWebview()
+                        state = True
+                    else:
+                        url = self._getAbsoluteUrl("error.html")
+                        self.logger.info(url)
+                        self.tabletService.loadUrl(url)
+                        self.tabletService.showWebview(url)
+                        self.onError("インターネット接続がありません。。。アプリを終了します")
+
+                    try:
+                        if not self.connectId:
+                            self.connectId = self.tabletService.onWifiStatusChange.connect(self.wifiStatusCallback)
+                    except Exception as err:
+                        self.logger.warning("Error during subscribe: %s " % err)
+
+                else:
+                    self.onError("ペッパーのタブレットエラーです。。。アプリを終了します")
+                    self.logger.warning("Got tablet service, but failed to set application: %s" % appName)
+            else:
+                self.onError("ペッパーのタブレットエラーです。。。アプリを終了します")
+                self.logger.warning("Couldn't find tablet service, so can't set application: %s" % appName)
+
+        if state:
+            self.onSuccess()
+        else:
+            self.onFailure()
+
+    def wifiStatusCallback(self, status):
+        if status == 'DISCONNECTED':
+            url = self._getAbsoluteUrl("error.html")
+            self.tabletService.loadUrl(url)
+            self.tabletService.showWebview(url)
+            self.onError("ネットワーク接続が突然切られました。アプリを終了します")]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onSuccess" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished successfully." id="3" /><Output name="onFailure" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished unsuccessfully." id="4" /><Output name="onError" type="3" type_size="1" nature="2" inner="0" tooltip="" id="5" /></Box><Box name="Hide Web View" id="4" localization="8" tooltip="Hides the webview (html content) on the tablet, behind a generic cover&#x0A;&#x0A;V1.0.0&#x0A;" x="440" y="200"><bitmap>media/images/box/internet/internet.png</bitmap><script language="4"><content><![CDATA[
+
+class MyClass(GeneratedClass):
+
+    def __init__(self):
+        GeneratedClass.__init__(self)
+
+    def onLoad(self):
+        pass
+
+    def onUnload(self):
+        pass
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def onInput_onStart(self):
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        tabletService = self._getTabletService()
+        if tabletService:
+            tabletService.hideWebview()
+        else:
+            self.logger.warning("ALTabletService not found.")
+        self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /></Box><Box name="Animated Say Text (1)" id="17" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="341" y="116"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="140" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="contextual" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="Wait" id="11" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="58" y="193"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        if self.getParameter("Trigger timerOutput if cancelled") and self.waiting and self.waiting.isRunning():
+            self.timerOutput()
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="4" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="2" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="5" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="6" /></Box><Box name="Raise Event" id="14" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="185" y="229"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="startPreview" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="AdjustHead" id="18" localization="8" tooltip="" x="327" y="287"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="TwitterApp/Control/AdjustHead" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/Control/AdjustHead" inner="1" tooltip="TwitterApp/Control/AdjustHead desc" id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="5" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Go to position zero" id="1" localization="8" tooltip="Robot will go to the position zero&lt;br/&gt;Position description : " x="700" y="331"><bitmap>/Users/administrator/.local/share/choregraphe/zero_1.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="1.66993" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-2.02149" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.263673" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position down5" id="2" localization="8" tooltip="Robot will go to the position down5&lt;br/&gt;Position description : " x="701" y="412"><bitmap>/Users/administrator/.local/share/choregraphe/新規ポジション_3.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="4.92187" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-2.02149" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.263673" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position down10" id="3" localization="8" tooltip="Robot will go to the position down10&lt;br/&gt;Position description : " x="657" y="516"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="10.5469" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-2.02149" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.263673" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position down15" id="4" localization="8" tooltip="Robot will go to the position down15&lt;br/&gt;Position description : " x="566" y="582"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="15.293" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-2.02149" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.263673" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position down20" id="5" localization="8" tooltip="Robot will go to the position down20&lt;br/&gt;Position description : " x="408" y="517"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="20.4785" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-2.63671" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position up5" id="6" localization="8" tooltip="Robot will go to the position up5&lt;br/&gt;Position description : " x="672" y="233"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="-4.7461" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-1.9336" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.175782" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position up10" id="7" localization="8" tooltip="Robot will go to the position up10&lt;br/&gt;Position description : " x="681" y="111"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="-10.2832" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-1.9336" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.175782" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.209" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Go to position up15" id="8" localization="8" tooltip="Robot will go to the position up15&lt;br/&gt;Position description : " x="523" y="71"><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="-1" size="20"><ActuatorList model=""><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="-1"><Key frame="20" value="-15.3809" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="-1"><Key frame="20" value="0.0878912" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="-1"><Key frame="20" value="-1.9336" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="-1"><Key frame="20" value="-0.527345" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="-1"><Key frame="20" value="-0.175782" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="-1"><Key frame="20" value="-29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="-1"><Key frame="20" value="-70.3122" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="-1"><Key frame="20" value="0.592267" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.8243" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="-1"><Key frame="20" value="7.82225" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="-1"><Key frame="20" value="0.61283" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="-1"><Key frame="20" value="29.7071" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="-1"><Key frame="20" value="70.5764" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="-1"><Key frame="20" value="0.601054" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="-1"><Key frame="20" value="89.4725" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="-1"><Key frame="20" value="-8.52538" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="-1"><Key frame="20" value="-0.617643" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Switch Case" id="9" localization="8" tooltip="Test input value and stimulate the output matching to this value. If there is no&#x0A;matching output, the default output (onDefault) is stimulated.&#x0A;&#x0A;You can edit a case by left double-clicking on the line. You can add a&#x0A;case by right clicking on a line and selecting &apos;Insert a row&apos;. You can delete&#x0A;a case by right clicking on a line and selecting &apos;Remove a row&apos;." plugin="dispatcher_plugin" x="295" y="246"><bitmap>media/images/box/interaction/choice.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		try: # disable autoBind
+		  GeneratedClass.__init__(self, False)
+		except TypeError: # if NAOqi < 1.14
+		  GeneratedClass.__init__( self )
+
+	def onInput_onStart(self, p):
+		p = self.typeConversion(p)
+		if(p == self.typeConversion(0)):
+			self.output_1(p)
+		elif(p == self.typeConversion(1)):
+			self.output_2(p)
+		elif(p == self.typeConversion(2)):
+			self.output_3(p)
+		elif(p == self.typeConversion(3)):
+			self.output_4(p)
+		elif(p == self.typeConversion(4)):
+			self.output_5(p)
+		elif(p == self.typeConversion(5)):
+			self.output_6(p)
+		elif(p == self.typeConversion(6)):
+			self.output_7(p)
+		elif(p == self.typeConversion(7)):
+			self.output_8(p)
+		else:
+			self.onDefault()
+
+	def typeConversion(self, p):
+		try:
+			p = float(p)
+			pint = int(p)
+			if( p == pint ):
+				p = pint
+		except:
+			p = str(p)
+		return p]]></content></script><pluginContent><keywords><keyword>0</keyword><keyword>1</keyword><keyword>2</keyword><keyword>3</keyword><keyword>4</keyword><keyword>5</keyword><keyword>6</keyword><keyword>7</keyword><keyword></keyword></keywords></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="1" inner="0" tooltip="Value to test." id="2" /><Output name="onDefault" type="1" type_size="1" nature="2" inner="0" tooltip="If the input value does not match any value set on the box." id="3" /><Output name="output_1" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="4" /><Output name="output_2" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="5" /><Output name="output_3" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="6" /><Output name="output_4" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="7" /><Output name="output_5" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="8" /><Output name="output_6" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="9" /><Output name="output_7" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="10" /><Output name="output_8" type="0" type_size="1" nature="2" inner="0" tooltip="このIOはボックスにより自動で追加されました。詳細はボックスのツールチップをご覧ください。" id="11" /></Box><Box name="Text Edit" id="10" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="102" y="49"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("4")]]></content></script><pluginContent><text><![CDATA[4]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Log" id="11" localization="8" tooltip="Prompt the message in the debug window. You can set a prefix and a priority&#x0A;for the message in the parameters." x="106" y="368"><bitmap>media/images/box/print.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        #~ puts code for box initialization here
+        pass
+
+    def onUnload(self):
+        #~ puts code for box cleanup here
+        pass
+
+    def onInput_message(self, p):
+        sPriority = self.getParameter("Priority")
+        sMessage = self.getParameter("Message prefix")
+        if( sMessage != "" and p != None ):
+            sMessage += ": "
+        if( p != None ):
+            sMessage += str(p)
+        if( sPriority == "Fatal" ):
+            self.logger.fatal( sMessage )
+        elif( sPriority == "Error" ):
+            self.logger.error( sMessage )
+        elif( sPriority == "Warning" ):
+            self.logger.warning( sMessage )
+        elif( sPriority == "Info" ):
+            self.logger.info( sMessage )
+        elif( sPriority == "Debug" ):
+            self.logger.debug( sMessage )
+        self.onDone()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="message" type="0" type_size="1" nature="1" inner="0" tooltip='The message to print or a &quot;Bang&quot; to only print the message set as parameter.' id="2" /><Output name="onDone" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Parameter name="Message prefix" inherits_from_parent="0" content_type="3" value="Message text" default_value="Message text" custom_choice="0" tooltip="Enter the text you want to print before the input message." id="4" /><Parameter name="Priority" inherits_from_parent="0" content_type="3" value="Info" default_value="Info" custom_choice="0" tooltip="Enter the priority of your message. If you select error, the box will get red when it will be stimulated." id="5"><Choice value="Fatal" /><Choice value="Error" /><Choice value="Warning" /><Choice value="Info" /><Choice value="Debug" /></Parameter></Box><Link inputowner="8" indexofinput="2" outputowner="9" indexofoutput="4" /><Link inputowner="7" indexofinput="2" outputowner="9" indexofoutput="5" /><Link inputowner="6" indexofinput="2" outputowner="9" indexofoutput="6" /><Link inputowner="1" indexofinput="2" outputowner="9" indexofoutput="7" /><Link inputowner="2" indexofinput="2" outputowner="9" indexofoutput="8" /><Link inputowner="3" indexofinput="2" outputowner="9" indexofoutput="9" /><Link inputowner="4" indexofinput="2" outputowner="9" indexofoutput="10" /><Link inputowner="5" indexofinput="2" outputowner="9" indexofoutput="11" /><Link inputowner="10" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="9" indexofinput="2" outputowner="10" indexofoutput="3" /><Link inputowner="9" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="11" indexofinput="2" outputowner="0" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Box name="Twitter" id="19" localization="8" tooltip="" x="516" y="0"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="TwitterApp/View/Search" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/View/Search" inner="1" tooltip="TwitterApp/View/Search desc" id="4" /><Input name="TwitterApp/View/ChangeListView" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/View/ChangeListView" inner="1" tooltip="TwitterApp/View/ChangeListView desc" id="5" /><Input name="TwitterApp/readTweet" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/readTweet" inner="1" tooltip="TwitterApp/readTweet desc" id="6" /><Input name="TwitterApp/stopReadingTweet" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/stopReadingTweet" inner="1" tooltip="TwitterApp/stopReadingTweet desc" id="7" /><Input name="TwitterApp/TakePhoto" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/TakePhoto" inner="1" tooltip="TwitterApp/TakePhoto desc" id="8" /><Input name="TwitterApp/PostStatus" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/PostStatus" inner="1" tooltip="TwitterApp/PostStatus desc" id="9" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="10" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram scale="141.421"><Box name="Twitter Search" id="1" localization="8" tooltip="" x="175" y="24"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[try:
+    import json
+except ImportError:
+    import simplejson as json
+import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+        self.framemanager = ALProxy("ALFrameManager")
+        self.tweets = []
+        self.displayingTweets = []
+        self.running = False
+        self.indexReading = -1
+        self.bisReading = False
+        self.isFollowingAccount = False
+        self.autoUpdate = False
+        self.time = 0
+        pass
+
+    def onUnload(self):
+        self.framemanager = None
+        self.memory = None
+        pass
+
+    def onInput_onStart(self, keyword):
+        if self.running:
+            self.memory.raiseEvent('TwitterApp/ResetView', 'Reset')
+            return
+        self.running = True
+        lib_path = self.framemanager.getBehaviorPath(self.behaviorId) + '/lib'
+        import sys
+        #sys.path.insert(0, '/home/nao/.local/share/PackageManager/apps/twitter-2018/lib')
+        sys.path.insert(0, lib_path)
+        from twitter import *
+
+        CONFIG = self.framemanager.getBehaviorPath(self.behaviorId) + '/resource/config.json'
+        config_data = open(CONFIG)
+        data = json.load(config_data)
+        oauth = OAuth(str(data['ACCESS_TOKEN']), str(data['ACCESS_SECRET']), str(data['CONSUMER_KEY']), str(data['CONSUMER_SECRET']))
+
+
+        twitter = Twitter(auth=oauth)
+
+        result_search = twitter.search.tweets(q=str(keyword), result_type='recent', lang='ja', locale='ja', count=100)
+        self.logger.info("Tweets: " + str(len(result_search["statuses"])))
+        self.tweets = result_search["statuses"]
+        self.tweets = self._addAttrToTweet(self.tweets)
+
+        #self.logger.info(str(self.result_search))
+        self.memory.raiseEvent('TwitterApp/ResetView', 'Reset')
+        self.createView(self.isFollowingAccount)
+        self.running = False
+        pass
+
+    def _addAttrToTweet(self, tweets):
+        newTweets = tweets
+        for tweet in newTweets:
+            tweet["isRead"] = False
+
+        return newTweets
+
+    def onInput_updateListView(self, position):
+        self.logger.info("onInput_updateListView")
+        self.memory.raiseEvent('TwitterApp/ResetView', 'Reset')
+        if self.running:
+            return
+        self.running = True
+        pos = int(position)
+        if pos is 0:
+            self.isFollowingAccount = False
+            self.createView(self.isFollowingAccount)
+        if pos is 1:
+            self.isFollowingAccount = True
+            self.createView(self.isFollowingAccount)
+        self.running = False
+        pass
+
+    def createView(self, isFollowingAccount):
+        ul = ''
+        if isFollowingAccount:
+            for tweet in self.tweets:
+                if tweet["user"]["following"] is True:
+                    self.displayingTweets.append(tweet)
+                    idOfLi = "li" + str(self.tweets.index(tweet))
+                    ul += self.createHTML(idOfLi, tweet)
+            if len(ul) > 0:
+                self.memory.raiseEvent('TwitterApp/UpdateTweetsListView', ul.encode('utf-8'))
+        else:
+            for tweet in self.tweets:
+                self.displayingTweets.append(tweet)
+                idOfLi = "li" + str(self.tweets.index(tweet))
+                ul += self.createHTML(idOfLi, tweet)
+            if len(ul) > 0:
+                self.memory.raiseEvent('TwitterApp/UpdateTweetsListView', ul.encode('utf-8'))
+
+    def onInput_readTweet(self, position):
+        self.logger.info("onInput_readTweet")
+        if self.bisReading:
+            return
+        self.bisReading = True
+        for displayingTweet in self.displayingTweets:
+            if displayingTweet["isRead"] is False:
+                originTweet = self.tweets[self.tweets.index(displayingTweet)]
+                originTweet["isRead"] = True
+                displayingTweet["isRead"] = True
+                self.indexReading = self.displayingTweets.index(displayingTweet)
+                self.logger.info(self.indexReading)
+                self.sayText(str(displayingTweet["text"].encode('utf-8')))
+                id = "#li" + str(self.indexReading)
+                self.memory.raiseEvent('TwitterApp/updateLiBackgroundColor', id)
+                return
+
+    def onInput_continueReadyTweet(self):
+        self.bisReading = False
+        if self.indexReading is -1:
+            return
+        else:
+            # Wait for 5 seconds
+            time.sleep(5)
+            self.bisReading = True
+            self.indexReading += 1
+            for i in range(self.indexReading, len(self.displayingTweets)):
+                displayingTweet = self.displayingTweets[i]
+                text = str(i)
+                self.logger.info("indexReading:"+text)
+                if displayingTweet["isRead"] is False:
+                    originTweet = self.tweets[self.tweets.index(displayingTweet)]
+                    originTweet["isRead"] = True
+                    displayingTweet["isRead"] = True
+                    self.sayText(text + "-%s:%s" %(str(i), str(displayingTweet["text"].encode('utf-8'))))
+                    self.indexReading = i
+                    id = "#li" + str(self.indexReading)
+                    self.memory.raiseEvent('TwitterApp/updateLiBackgroundColor', id)
+                    return
+                i +=1
+
+    def onInput_stopReadingTweet(self):
+        self.indexReading = -1
+        self.bisReading = False
+        self.stopSayingText()
+
+    def onInput_autoUpdateTweet(self, position):
+        self.autoUpdate = False
+
+    def createHTML(self, idOfLi, tweet):
+        li  = '<li id="%s" class="list-group-item">' % str(idOfLi)
+        li += '<div class="row">'
+        li += '<div class="col-0" style="float: none; margin: 0 auto;">'
+        li += '<div class="label">'
+        li += '<img src="%s" class="rounded-circle z-depth-1-half">' % (tweet["user"]["profile_image_url_https"])
+        li += '</div></div>'
+        li += '<div class="col-11" style="float: none; margin: 0 auto;">'
+        li += '<div class="d-flex w-100 justify-content-between">'
+        li += '<h5 class="name">%s@%s</h5>' % (tweet["user"]["name"], tweet["user"]["screen_name"])
+        time = tweet["created_at"][0:19]
+        li += '<small class="date text-right">%s</small>' % time
+        li += '</div>'
+        li += '<div class="added-text">%s</div>'% (tweet["text"])
+        li += '<div class="feed-footer"><a class="like">'
+        #li += '<i class="fa fa-refresh"></i><span> %s</span>' % (tweet["retweet_count"])
+        li += '<i class="fa fa-heart"></i><span> %s</span>' % (tweet["favorite_count"])
+        li += '</a></div></div></div><!--Grid row--></li>'
+        #<i class="fa fa-refresh"></i>
+
+        return li
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="updateListView" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Input name="readTweet" type="0" type_size="1" nature="1" inner="0" tooltip="" id="5" /><Input name="stopReadingTweet" type="1" type_size="1" nature="1" inner="0" tooltip="" id="6" /><Input name="continueReadyTweet" type="1" type_size="1" nature="1" inner="0" tooltip="" id="7" /><Input name="autoUpdateTweet" type="0" type_size="1" nature="1" inner="0" tooltip="" id="8" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="9" /><Output name="sayText" type="3" type_size="1" nature="2" inner="0" tooltip="" id="10" /><Output name="stopSayingText" type="1" type_size="1" nature="2" inner="0" tooltip="" id="11" /></Box><Box name="Take Picture" id="7" localization="8" tooltip="Take a picture with one of the cameras camera and store it in his memory in ~/recordings/cameras. The image format is JPG.&#x0A;&#x0A;V1.1.0&#x0A;" x="179" y="283"><bitmap>media/images/box/interaction/picture.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.resolutionMap = {
+            '160 x 120': 0,
+            '320 x 240': 1,
+            '640 x 480': 2,
+            '1280 x 960': 3
+        }
+        self.cameraMap = {
+            'Top': 0,
+            'Bottom': 1
+        }
+
+    def onLoad(self):
+        self.framemanager = ALProxy("ALFrameManager")
+        self.bIsRunning = False
+        try:
+            self.photoCapture = ALProxy( "ALPhotoCapture" )
+        except Exception as e:
+            self.photoCapture = None
+            self.logger.error(e)
+
+    def onUnload(self):
+        pass
+
+    def _getTabletService(self):
+        tabletService = None
+        try:
+            tabletService = self.session().service("ALTabletService")
+        except Exception as e:
+            self.logger.error(e)
+        return tabletService
+
+    def _getAbsoluteUrl(self, partial_url):
+        import os
+        subPath = os.path.join(self.packageUid(), os.path.normpath(partial_url).lstrip("\\/"))
+        # We create TabletService here in order to avoid
+        # problems with connections and disconnections of the tablet during the life of the application
+        return "http://%s/apps/%s" %(self._getTabletService().robotIp(), subPath.replace(os.path.sep, "/"))
+
+    def getUrl(self):
+        url = self.getParameter("File Name")
+        if url == '':
+            self.logger.error("URL of the image is empty")
+        if not url.startswith('http'):
+            url = self._getAbsoluteUrl(url)
+        # 追加コード: ここから
+        url += ".jpg"
+        return url
+    def onInput_onStart(self):
+        if( self.bIsRunning ):
+            return
+
+        import os
+        self.recordFolder = os.path.join(
+                self.framemanager.getBehaviorPath(self.behaviorId), "../html")
+        self.logger.info(self.recordFolder)
+        self.bIsRunning = True
+        resolution = self.resolutionMap[self.getParameter("Resolution")]
+        cameraID = self.cameraMap[self.getParameter("Camera")]
+        fileName = self.getParameter("File Name")
+        if self.photoCapture:
+            self.photoCapture.setResolution(resolution)
+            self.photoCapture.setCameraID(cameraID)
+            self.photoCapture.setPictureFormat("jpg")
+            self.photoCapture.takePicture( self.recordFolder, fileName )
+        self.bIsRunning = False
+        self.logger.info(self.getUrl())
+        self.onSuccess(self.getUrl())]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished." id="3" /><Output name="onSuccess" type="3" type_size="1" nature="2" inner="0" tooltip="" id="4" /><Parameter name="Resolution" inherits_from_parent="0" content_type="3" value="640 x 480" default_value="640 x 480" custom_choice="0" tooltip="Image resolution." id="5"><Choice value="160 x 120" /><Choice value="320 x 240" /><Choice value="640 x 480" /><Choice value="1280 x 960" /></Parameter><Parameter name="File Name" inherits_from_parent="0" content_type="3" value="testx" default_value="image" custom_choice="0" tooltip="Name of the file without its extension." id="6" /><Parameter name="Camera" inherits_from_parent="0" content_type="3" value="Top" default_value="Top" custom_choice="0" tooltip="Enables to select the camera (Top or Bottom) that will take the picture." id="7"><Choice value="Top" /><Choice value="Bottom" /></Parameter></Box><Box name="Raise Event" id="8" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="369" y="279"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), str(p))
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="TwitterApp/stopPreview" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Twitter Post" id="16" localization="8" tooltip="" x="226" y="439"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[try:
+    import json
+except ImportError:
+    import simplejson as json
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+        self.framemanager = ALProxy("ALFrameManager")
+        self.tweets = []
+        self.running = False
+        pass
+
+    def onUnload(self):
+        self.framemanager = None
+        self.memory = None
+        pass
+
+    def onInput_onStart(self, keyword):
+        self.imgUrl = keyword
+        pass
+
+    def onInput_postStatus(self, content):
+        if self.running:
+            return
+        self.running = True
+        lib_path = self.framemanager.getBehaviorPath(self.behaviorId) + '/lib'
+        import sys
+        sys.path.insert(0, lib_path)
+        from twitter import *
+
+        CONFIG = self.framemanager.getBehaviorPath(self.behaviorId) + '/resource/config.json'
+        config_data = open(CONFIG)
+        data = json.load(config_data)
+        oauth = OAuth(str(data['ACCESS_TOKEN']), str(data['ACCESS_SECRET']), str(data['CONSUMER_KEY']), str(data['CONSUMER_SECRET']))
+
+
+        twitter = Twitter(auth=oauth)
+
+        # Send images along with your tweets:
+        # - first just read images from the web or from files the regular way:
+        with open('/home/nao/.local/share/PackageManager/apps/.lastUploadedChoregrapheBehavior/html/testx.jpg', "rb") as imagefile:
+            imagedata = imagefile.read()
+
+        t_upload = Twitter(domain='upload.twitter.com',auth=oauth)
+        id_img1 = t_upload.media.upload(media=imagedata)["media_id_string"]
+        id_img2 = t_upload.media.upload(media=imagedata)["media_id_string"]
+        # - finally send your tweet with the list of media ids:
+        try:
+            twitter.statuses.update(status=str(content), media_ids=",".join([id_img1, id_img2]))
+            self.onSuccess("アップロード成功")
+        except:
+            self.onSuccess("アップロード失敗")
+        self.running = False
+        pass
+
+    def onInput_onStop(self):
+        self.onUnload() #it is recommended to reuse the clean-up as the box is stopped
+        self.onStopped() #activate the output of the box]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="postStatus" type="0" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="5" /><Output name="onSuccess" type="3" type_size="1" nature="2" inner="0" tooltip="" id="6" /></Box><Box name="Raise Event (1)" id="2" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="384" y="420"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), str(p))
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="TwitterApp/PostPage/showNotify" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Animated Say Text" id="3" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="398" y="40"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            self.logger.info("Animated Say:" +str(p))
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="random" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="Animated Say" id="4" localization="8" tooltip="Say some text with animations. The text can be localized." x="619" y="144"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            textParam = self.getParameter("Text")
+            if movement == "disabled":
+                textParam = "^start({0}) {1} ^wait({0})".format(self.getParameter("Animation"), textParam)
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += textParam
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Text" inherits_from_parent="0" content_type="5" value="Hello" default_value="" tooltip="The text you want to say. Don&apos;t forget to translate it!" id="7" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="disabled" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="8"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter><Parameter name="Animation" inherits_from_parent="0" content_type="3" value="Stand/Gestures/Hey_2" default_value="" custom_choice="0" tooltip="The animation to play" id="9" /></Box><Box name="Say Text" id="5" localization="8" tooltip="Say the text received on its input." x="513" y="190"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALTextToSpeech')
+        self.ttsStop = ALProxy('ALTextToSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence))
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Resource name="Speech" type="Lock" timeout="0" /></Box><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="8" indexofinput="2" outputowner="7" indexofoutput="4" /><Link inputowner="16" indexofinput="2" outputowner="7" indexofoutput="4" /><Link inputowner="7" indexofinput="2" outputowner="0" indexofoutput="8" /><Link inputowner="16" indexofinput="4" outputowner="0" indexofoutput="9" /><Link inputowner="2" indexofinput="2" outputowner="16" indexofoutput="6" /><Link inputowner="1" indexofinput="4" outputowner="0" indexofoutput="5" /><Link inputowner="3" indexofinput="2" outputowner="1" indexofoutput="10" /><Link inputowner="1" indexofinput="5" outputowner="0" indexofoutput="6" /><Link inputowner="3" indexofinput="3" outputowner="1" indexofoutput="11" /><Link inputowner="1" indexofinput="6" outputowner="0" indexofoutput="7" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Box name="Go to position StandInit" id="1" localization="8" tooltip="Robot will go to the position StandInit&lt;br/&gt;Position description : Nao is ready to do anything from this position !" x="578" y="185"><bitmap>media/images/positions/StandInit.png</bitmap><script language="4"><content><![CDATA[#~ This script was generated automatically by drang&drop from Position Library
+class MyClass(GeneratedClass):
+    def __init__(self):
+        try: # disable autoBind
+          GeneratedClass.__init__(self, False)
+        except TypeError: # if NAOqi < 1.14
+          GeneratedClass.__init__( self )
+
+    def onLoad(self):
+        self.postureProxy = None
+        try:
+            self.postureProxy = ALProxy("ALRobotPosture")
+        except:
+            self.logger.error("Module 'ALRobotPosture' not found.")
+
+    def onUnload(self):
+        if(self.postureProxy != None):
+            self.postureProxy.stopMove()
+
+    def onInput_onStart(self):
+        if(self.postureProxy != None):
+            result = self.postureProxy.goToPosture("StandInit", 0.8)
+            if(result):
+                self.success()
+            else:
+                self.logger.error("Posture StandInit is not a part of the standard posture library or robot cannot reach the posture")
+                self.failure()
+        else:
+            self.failure()
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommanded to call onUnload of this box in a onStop method,               as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="success" type="1" type_size="1" nature="1" inner="0" tooltip="Stimulated if the posture has been reached." id="4" /><Output name="failure" type="1" type_size="1" nature="1" inner="0" tooltip="Stimulated if the posture could not be reached." id="5" /><Resource name="All motors" type="Lock" timeout="0" /><Resource name="Stiffness" type="Lock" timeout="0" /></Box><Box name="GoogleSpeechToText" id="7" localization="8" tooltip="" x="513" y="96"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="TwitterApp/Start" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/Start" inner="1" tooltip="TwitterApp/Start desc" id="4" /><Input name="TwitterApp/View/Voice" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/View/Voice" inner="1" tooltip="TwitterApp/View/Voice desc" id="5" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックスBehaviorの終了時に信号を送る。" id="6" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram><Box name="Text Edit" id="13" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="299" y="73"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("音声認識、またはテキストで入力してね？")]]></content></script><pluginContent><text><![CDATA[音声認識、またはテキストで入力してね？]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Animated Say Text" id="5" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="570" y="76"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="140" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="contextual" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="GoogleSTT" id="6" localization="8" tooltip="This box is empty and should be used to create any box diagram you would like.&#x0A;&#x0A;To edit its diagram, double-click on it." x="729" y="217"><bitmap>media/images/box/interaction/ear.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Input name="TwitterApp/Control/StopVoice" type="0" type_size="1" nature="4" stm_value_name="TwitterApp/Control/StopVoice" inner="1" tooltip="TwitterApp/Control/StopVoice desc" id="4" /><Output name="NonRecognition" type="3" type_size="1" nature="2" inner="0" tooltip="Signal sent when box behavior is finished." id="5" /><Output name="Recognition" type="3" type_size="1" nature="2" inner="0" tooltip="" id="6" /><Output name="onStopped" type="1" type_size="1" nature="2" inner="0" tooltip="" id="7" /><Parameter name="GoogleSTTKey" inherits_from_parent="0" content_type="4" value="/resource/keyGoogleSTT.json" default_value="" tooltip="" id="8" /><Parameter name="Timeout" inherits_from_parent="0" content_type="1" value="15" default_value="0" min="0" max="100" tooltip="" id="9" /><Timeline enable="0"><BehaviorLayer name="behavior_layer1"><BehaviorKeyframe name="keyframe1" index="1"><Diagram scale="84.0896"><Box name="GSTT V1Beta" id="4" localization="8" tooltip="" x="613" y="31"><bitmap>media/images/box/box-python-script.png</bitmap><script language="4"><content><![CDATA[import json
+import os
+import time
+from datetime import datetime
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        self.discovery_url = ('https://{api}.googleapis.com/$discovery/rest?'
+            'version={apiVersion}')
+
+    def onLoad(self):
+        self.bRunning = True
+        self.memory = ALProxy("ALMemory")
+        self.framemanager = ALProxy("ALFrameManager")
+
+    def onUnload(self):
+        self.bRunning = False
+        self.framemanager = None
+        if os.environ.has_key("GOOGLE_APPLICATION_CREDENTIALS"):
+            os.environ.pop("GOOGLE_APPLICATION_CREDENTIALS")
+
+    def getTimeStamp(self):
+        '''
+        タイムスタンプ取得
+        '''
+        return datetime.now().strftime('%H:%M:%S').encode('utf-8')
+
+    def onInput_onStart(self, filename):
+        '''
+        音声認識開始
+        '''
+        # APIキーの反映
+        keyPath = self.framemanager.getBehaviorPath(self.behaviorId) + self.getParameter("GoogleSTTKey")
+        self.logger.info("onStart id:" + self.framemanager.getBehaviorPath(self.behaviorId))
+        if (not os.path.exists(keyPath)):
+            self.logger.info("onStart:" + keyPath)
+            #self.leds.post.fadeRGB("RightFaceLeds", 0xff0000, 0)
+            return
+        os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = keyPath
+
+        # Google Speech APIで音声認識開始
+        #self.leds.post.fadeRGB("FaceLeds", 0x00ff00, 0)
+        res = self.startSpeechRecognition(filename)
+        results = json.loads(res)
+        self.logger.info(results)
+
+        try:
+            # レスポンス結果が空の場合は認識できなかったとする
+            if len(results) == 0:
+                self.logger.info("[STT Info]: 認識失敗 %s" % self.getTimeStamp())
+                #self.leds.post.fadeRGB("FaceLeds", 0x0000ff, 0)
+                if self.bRunning: self.NonRecognition(filename)
+            else:
+                # 内容を確認する
+                if('alternatives' in results['results'][0]):
+                    speech_reco = results['results'][0]['alternatives'][0]['transcript']
+                    #self.leds.post.fadeRGB("FaceLeds", 0xffffff, 0)
+                    self.logger.info("[STT Info]: 認識成功 %s" % self.getTimeStamp())
+                    self.logger.info("[STT Info]: 認識結果： " + speech_reco.encode("utf-8"))
+                    if self.bRunning: self.Recognition(speech_reco.encode('utf-8'))
+                # エラー
+                else:
+                    #self.leds.post.fadeRGB("LeftFaceLeds", 0xff0000, 0)
+                    if self.bRunning: self.NonRecognition(filename)
+        except Exception as e:
+            #self.leds.post.fadeRGB("LeftFaceLeds", 0xffff00, 0)
+            if self.bRunning: self.NonRecognition(filename)
+
+    def encodeAudio(self, audio):
+        '''
+        エンコード処理
+        '''
+        import base64
+        audio_content = audio.read()
+        return base64.b64encode(audio_content)
+
+    def getSpeechService(self):
+        lib_path = self.framemanager.getBehaviorPath(self.behaviorId) + '/lib'
+        import sys
+        #sys.path.insert(0, '/home/nao/.local/share/PackageManager/apps/twitter-2018/lib')
+        sys.path.insert(0, lib_path)
+        from googleapiclient import discovery
+        import httplib2
+        from oauth2client.client import GoogleCredentials
+
+        credentials = GoogleCredentials.get_application_default().create_scoped(['https://www.googleapis.com/auth/cloud-platform'])
+        http = httplib2.Http()
+        credentials.authorize(http)
+
+        return discovery.build('speech', 'v1beta1', http = http, discoveryServiceUrl = self.discovery_url)
+
+    def startSpeechRecognition(self, sound_file):
+        '''
+        音声認識開始
+        '''
+
+        try:
+            with open(sound_file, 'rb') as sound:
+                sound_content = self.encodeAudio(sound)
+            service = self.getSpeechService()
+            service_request = service.speech().syncrecognize(
+                body = {
+                    'config': {
+                        'encoding': 'LINEAR16',
+                        'sampleRate': 16000,
+                        'languageCode': 'ja-JP',
+                    },
+                    'audio': {
+                        'content': sound_content.decode('utf-8')
+                        }
+                    })
+            res_json = service_request.execute()
+        except Exception as e:
+            res_json = {'results': str(e)}
+
+        return json.dumps(res_json)
+
+    def onInput_onStop(self):
+        self.onUnload()
+        self.onStopped()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="Recognition" type="3" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る。" id="4" /><Output name="NonRecognition" type="3" type_size="1" nature="1" inner="0" tooltip="" id="5" /><Output name="onStopped" type="1" type_size="1" nature="2" inner="0" tooltip="" id="6" /><Parameter name="Timeout" inherits_from_parent="1" content_type="1" value="15" default_value="10" min="1" max="3600" tooltip="" id="7" /><Parameter name="GoogleSTTKey" inherits_from_parent="1" content_type="4" value="" default_value="" tooltip="" id="8" /></Box><Box name="RecoFeedback" id="2" localization="8" tooltip="Recognize a word from a list of words set in the box parameters.&#x0A;&#x0A;V1.1.0&#x0A;" x="210" y="363"><bitmap>media/images/box/interaction/ear.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try:
+            self.asr = ALProxy("ALSpeechRecognition")
+        except Exception as e:
+            self.asr = None
+            self.logger.error(e)
+        self.memory = ALProxy("ALMemory")
+        self.leds = ALProxy("ALLeds")
+
+    def onLoad(self):
+        from threading import Lock
+        self.bIsRunning = False
+        self.mutex = Lock()
+        self.hasPushed = False
+        self.hasSubscribed = False
+        self.BIND_PYTHON(self.getName(), "onWordRecognized")
+
+    def onUnload(self):
+        from threading import Lock
+        self.mutex.acquire()
+        try:
+            if (self.bIsRunning):
+                if (self.hasSubscribed):
+                    self.memory.unsubscribeToEvent("WordRecognized", self.getName())
+                if (self.hasPushed and self.asr):
+                    self.asr.popContexts()
+        except RuntimeError, e:
+            self.mutex.release()
+            raise e
+        self.bIsRunning = False;
+        self.mutex.release()
+
+    def onInput_onStart(self):
+        from threading import Lock
+
+        self.mutex.acquire()
+        if(self.bIsRunning):
+            self.mutex.release()
+            return
+        self.bIsRunning = True
+        try:
+            if self.asr:
+                self.asr.setVisualExpression(self.getParameter("Visual expression"))
+                self.asr.pushContexts()
+            self.hasPushed = True
+            if self.asr:
+                self.asr.setVocabulary("/".split(';'), 0)
+            self.memory.subscribeToEvent("WordRecognized", self.getName(), "onWordRecognized")
+            self.hasSubscribed = True
+        except RuntimeError, e:
+            self.mutex.release()
+            self.onUnload()
+            self.logger.info(e)
+            self.leds.post.fadeRGB("FaceLeds", 0xff0000, 1.0)
+            self.leds.post.fade("EarLeds", 0, 1.0)
+
+            raise e
+        self.mutex.release()
+
+    def onInput_onStop(self):
+        if( self.bIsRunning ):
+            self.asr.setVisualExpression(0) # 意図的にOFFにする
+            self.onUnload()
+            self.onStopped()
+
+    def onWordRecognized(self, key, value, message):
+        self.asr.setVisualExpression(0) # 意図的にOFFにする
+        self.onUnload()
+        self.onStopRecording()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="" id="3" /><Output name="onStopRecording" type="1" type_size="1" nature="1" inner="0" tooltip="Word recognized with a confidence higher than the threshold set in the box parameters." id="4" /><Output name="onError" type="3" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Confidence threshold (%)" inherits_from_parent="0" content_type="1" value="0" default_value="30" min="0" max="100" tooltip="If the confidence associated with the word recognized is below this threshold, the robot will consider that it is not recognized." id="6" /><Parameter name="Visual expression" inherits_from_parent="0" content_type="0" value="1" default_value="1" tooltip="Use the LEDs to show feedbacks from the robot during the recognition.&#x0A;&#x0A;For example:&#x0A;- Eyes leds get blue and turn when the speech recognition is launched.&#x0A;- They get yellow when the robot hears someone talking and analyses what it heard.&#x0A;- They flash in green when the robot understood and flash in red otherwise." id="7" /><Resource name="Speech recognition" type="Lock" timeout="-1" /></Box><Box name="Text Edit (1)" id="8" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="420" y="407"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("処理中 ...\n")]]></content></script><pluginContent><text><![CDATA[処理中 ...
+]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Text Edit" id="3" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="804" y="146"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("認識失敗")]]></content></script><pluginContent><text><![CDATA[認識失敗]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Recorder" id="9" localization="8" tooltip="Stimulate output repeatedly with the specified interval.&#x0A;Can be stopped anytime. &#x0A;Stimulating the input again restarts the timer.&#x0A;" x="380" y="116"><bitmap>media/images/box/interaction/rec_sound.png</bitmap><script language="4"><content><![CDATA[from datetime import datetime
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        try:
+            self.recoder = ALProxy("ALAudioRecorder")
+        except Exception as e:
+            #self.ad = None
+            self.recoder = None
+            self.logger.error(e)
+
+        self.appFolder = ''
+        self.recPath = ''
+
+    def onLoad(self):
+        self.bIsRecording = False
+        self.bIsRunning = False
+        # 状態管理用フラグの初期化
+
+        if os.path.exists('/tmp/recordings/microphones/') is False:
+            os.makedirs("/tmp/recordings/microphones/")
+        self.recPath = "/tmp/recordings/microphones/temp.wav"
+
+    def onUnload(self):
+        self.bIsRunning = False
+        if( self.bIsRecording ):
+            #self.ad.stopMicrophonesRecording()
+            self.recoder.stopMicrophonesRecording()
+            self.bIsRecording = False
+        # 録音ファイルを削除する
+        #if (os.path.exists(self.recPath)):
+            #self.logger.info("[STT Info] onUnload: 録音ファイル削除" + self.recPath)
+            #os.remove(self.recPath)
+
+    def getTimeStamp(self):
+        '''
+        タイムスタンプ取得
+        '''
+        return datetime.now().strftime('%H:%M:%S').encode('utf-8')
+
+    def onInput_onStart(self):
+        if(self.bIsRunning):
+            return
+        self.bIsRunning = True
+        self.logger.info("[STT Info]onTimer: 録音開始 %s" % self.getTimeStamp())
+        self.recoder.startMicrophonesRecording(self.recPath, "wav", 16000, [0,0,1,0])
+        self.bIsRecording = True
+
+    def onInput_onRecognized(self):
+        '''
+        Reco による停止
+        '''
+        if( self.bIsRunning ):
+            self.logger.info("[STT Info]onInput_onRecognized: 録音終了 %s" % self.getTimeStamp())
+            self.logger.info("[STT Info]onInput_onRecognized: 送信開始 %s" % self.getTimeStamp())
+        #self.logger.info("■■■" + self.recPath)
+            self.timerOutput(self.recPath)
+            self.onInput_onStop()
+
+    def onInput_onStop(self):
+        self.logger.info("[STT Info]onInput_onStop: 録音終了 %s" % self.getTimeStamp())
+        if( self.bIsRunning ):
+            self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the timer using the configured period value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the timer." id="3" /><Input name="onRecognized" type="1" type_size="1" nature="1" inner="0" tooltip="" id="4" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when the box is stopped." id="5" /><Output name="timerOutput" type="3" type_size="1" nature="2" inner="0" tooltip="Send a bang periodically." id="6" /><Parameter name="Period (s)" inherits_from_parent="0" content_type="2" value="5" default_value="1" min="0" max="5000" tooltip="Defines the period of the timer box (in seconds).&#x0A;&#x0A;For example, if this parameter is equal to 1s, the timerOutput will be stimulated&#x0A;every second until the onStop input is stimulated." id="7" /></Box><Box name="Timeout (1)" id="1" localization="8" tooltip="Wait a moment before sending a signal on the output. &#x0A;Can be stopped anytime. &#x0A;Stimulating the input again before output is activated restarts the waiting period.&#x0A;" x="197" y="176"><bitmap>media/images/box/wait.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.waiting = None
+        self.leds = ALProxy("ALLeds")
+
+    def onUnload(self):
+        self.cancelWaiting()
+
+    def triggerOutput(self):
+        id = self.leds.post.fadeRGB("RightFaceLeds", 0xff00ff, 0)
+        self.timerOutput()
+
+    def cancelWaiting(self):
+        if self.waiting:
+            self.waiting.cancel()
+        self.waiting = None
+
+    def onInput_onStart(self):
+        self.cancelWaiting()
+        import qi
+        self.waiting = qi.async(self.triggerOutput, delay=int(self.getParameter("Timeout (s)") * 1000 * 1000))
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Start the Wait box with the configured timeout value." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Stop the wait and stimulate the output." id="3" /><Output name="timerOutput" type="1" type_size="1" nature="1" inner="0" tooltip="Send a bang once time set in parameters is elapsed, or if the box is stopped and the appropriate parameter is set." id="4" /><Output name="onStopRecording" type="1" type_size="1" nature="2" inner="0" tooltip="" id="5" /><Parameter name="Timeout (s)" inherits_from_parent="0" content_type="2" value="5" default_value="1" min="0" max="5000" tooltip="Duration the box waits before stimulating the output." id="6" /><Parameter name="Trigger timerOutput if cancelled" inherits_from_parent="0" content_type="0" value="0" default_value="1" tooltip="If the box is currently waiting and cancelled, output will be stimulated." id="7" /></Box><Box name="Text Edit (2)" id="10" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="542" y="285"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("聞き取れませんでした。もう一度お試しください")]]></content></script><pluginContent><text><![CDATA[聞き取れませんでした。もう一度お試しください]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Raise Event" id="6" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="705" y="413"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="TwitterApp/Control/Processing" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Link inputowner="0" indexofinput="6" outputowner="4" indexofoutput="4" /><Link inputowner="3" indexofinput="2" outputowner="4" indexofoutput="5" /><Link inputowner="0" indexofinput="5" outputowner="3" indexofoutput="3" /><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="9" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="4" indexofinput="2" outputowner="9" indexofoutput="6" /><Link inputowner="8" indexofinput="2" outputowner="9" indexofoutput="6" /><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="3" outputowner="1" indexofoutput="4" /><Link inputowner="1" indexofinput="3" outputowner="2" indexofoutput="4" /><Link inputowner="9" indexofinput="4" outputowner="2" indexofoutput="4" /><Link inputowner="2" indexofinput="3" outputowner="2" indexofoutput="4" /><Link inputowner="9" indexofinput="4" outputowner="1" indexofoutput="4" /><Link inputowner="0" indexofinput="7" outputowner="4" indexofoutput="6" /><Link inputowner="6" indexofinput="2" outputowner="8" indexofoutput="3" /><Link inputowner="2" indexofinput="3" outputowner="0" indexofoutput="4" /><Link inputowner="9" indexofinput="3" outputowner="0" indexofoutput="4" /><Link inputowner="4" indexofinput="3" outputowner="0" indexofoutput="4" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Box name="Text Edit (1)" id="15" localization="8" tooltip="Send the text you entered when the input is stimulated." plugin="textedit_plugin" x="237" y="212"><bitmap>media/images/box/interaction/vocabulary.png</bitmap><script language="4"><content><![CDATA[# /!\ Generated content. Do not edit!
+class MyClass(GeneratedClass):
+	def __init__(self):
+		GeneratedClass.__init__(self)
+
+	def onInput_onStart(self):
+		self.onStopped("お話しください")]]></content></script><pluginContent><text><![CDATA[お話しください]]></text></pluginContent><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="1" inner="0" tooltip="To send the text on the output." id="2" /><Output name="onStopped" type="3" type_size="1" nature="2" inner="0" tooltip="The text you entered." id="3" /></Box><Box name="Animated Say Text (1)" id="9" localization="8" tooltip="Say the text received on its input and move during its speech.&#x0A;" x="521" y="200"><bitmap>media/images/box/interaction/say.png</bitmap><script language="4"><content><![CDATA[import time
+
+class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+        self.tts = ALProxy('ALAnimatedSpeech')
+        self.ttsStop = ALProxy('ALAnimatedSpeech', True) #Create another proxy as wait is blocking if audioout is remote
+
+    def onLoad(self):
+        self.bIsRunning = False
+        self.ids = []
+
+    def onUnload(self):
+        for id in self.ids:
+            try:
+                self.ttsStop.stop(id)
+            except:
+                pass
+        while( self.bIsRunning ):
+            time.sleep( 0.2 )
+
+    def onInput_onStart(self, p):
+        self.bIsRunning = True
+        try:
+            movement = self.getParameter("Speaking movement mode")
+            sentence = "\RSPD="+ str( self.getParameter("Speed (%)") ) + "\ "
+            sentence += "\VCT="+ str( self.getParameter("Voice shaping (%)") ) + "\ "
+            sentence += str(p)
+            sentence +=  "\RST\ "
+            id = self.tts.post.say(str(sentence), {"speakingMovementMode":movement})
+            self.ids.append(id)
+            self.tts.wait(id, 0)
+        finally:
+            try:
+                self.ids.remove(id)
+            except:
+                pass
+            if( self.ids == [] ):
+                self.onStopped() # activate output of the box
+                self.bIsRunning = False
+
+    def onInput_onStop(self):
+        self.onUnload()]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when Diagram is loaded." id="1" /><Input name="onStart" type="3" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this Input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this Input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="Signal sent when Box behavior is finished." id="4" /><Parameter name="Voice shaping (%)" inherits_from_parent="1" content_type="1" value="140" default_value="100" min="50" max="150" tooltip='Used to modify at runtime the voice feature (tone, speed). In a slighty&#x0A;different way than pitch and speed, it gives a kind of &quot;gender or age&#x0A;modification&quot; effect.&#x0A;&#x0A;For instance, a quite good male derivation of female voice can be&#x0A;obtained setting this parameter to 78%.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the&#x0A;speed parameter. For example, if you want to decrease by 20% the voice&#x0A;shaping, you will have to increase by 20% the speed to keep a constant&#x0A;average speed.' id="5" /><Parameter name="Speed (%)" inherits_from_parent="1" content_type="1" value="100" default_value="100" min="50" max="200" tooltip="Changes the speed of the voice.&#x0A;&#x0A;Note: For a better effect, you can compensate this parameter with the voice&#x0A;shaping parameter. For example, if you want to increase by 20% the speed, you&#x0A;will have to decrease by 20% the voice shaping to keep a constant average&#x0A;speed." id="6" /><Parameter name="Speaking movement mode" inherits_from_parent="0" content_type="3" value="contextual" default_value="contextual" custom_choice="0" tooltip="Change the body language mode during the speech.&#x0A;disabled: The robot will only play the animations given by the user through the animation parameter.&#x0A;random: During time the robot has no animation to play, he will launch random neutral animations.&#x0A;contextual: During time the robot has no animation to play, he will try to launch a new one accordingly to the saying text. Every time the robot can&apos;t find a contextual animation he will launch a random neutral animation." id="7"><Choice value="disabled" /><Choice value="random" /><Choice value="contextual" /></Parameter></Box><Box name="n_基本姿勢" id="3" localization="8" tooltip="Enter tooltip here" x="764" y="77"><bitmap>media/images/box/box-diagram.png</bitmap><script language="4"><content><![CDATA[]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="1" type_size="1" nature="2" inner="0" tooltip="Box behavior starts when a signal is received on this input." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="1" type_size="1" nature="1" inner="0" tooltip="ボックス動作の終了時に信号を送る" id="4" /><Timeline enable="1" fps="25" start_frame="1" end_frame="25" size="25"><ActuatorList model="juliette"><ActuatorCurve name="value" actuator="LElbowRoll" mute="0" unit="0"><Key frame="25" value="-84.6388" /></ActuatorCurve><ActuatorCurve name="value" actuator="LElbowYaw" mute="0" unit="0"><Key frame="25" value="-6.20705" /></ActuatorCurve><ActuatorCurve name="value" actuator="LHand" mute="0" unit="1"><Key frame="25" value="0" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderPitch" mute="0" unit="0"><Key frame="25" value="81.2851" /></ActuatorCurve><ActuatorCurve name="value" actuator="LShoulderRoll" mute="0" unit="0"><Key frame="25" value="52" /></ActuatorCurve><ActuatorCurve name="value" actuator="LWristYaw" mute="0" unit="0"><Key frame="25" value="-88.6804" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowRoll" mute="0" unit="0"><Key frame="25" value="84.6388" /></ActuatorCurve><ActuatorCurve name="value" actuator="RElbowYaw" mute="0" unit="0"><Key frame="25" value="6.20705" /></ActuatorCurve><ActuatorCurve name="value" actuator="RHand" mute="0" unit="1"><Key frame="25" value="0" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderPitch" mute="0" unit="0"><Key frame="25" value="81.2851" /></ActuatorCurve><ActuatorCurve name="value" actuator="RShoulderRoll" mute="0" unit="0"><Key frame="25" value="-52" /></ActuatorCurve><ActuatorCurve name="value" actuator="RWristYaw" mute="0" unit="0"><Key frame="25" value="88.6804" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadPitch" mute="0" unit="0"><Key frame="25" value="-11.4592" /></ActuatorCurve><ActuatorCurve name="value" actuator="HeadYaw" mute="0" unit="0"><Key frame="25" value="2.93938e-06" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipPitch" mute="0" unit="0"><Key frame="25" value="-0.2" /></ActuatorCurve><ActuatorCurve name="value" actuator="HipRoll" mute="0" unit="0"><Key frame="25" value="0.000129227" /></ActuatorCurve><ActuatorCurve name="value" actuator="KneePitch" mute="0" unit="0"><Key frame="25" value="-4.2" /></ActuatorCurve></ActuatorList></Timeline></Box><Box name="Only Once With Init" id="1" localization="8" tooltip="This box&apos;s output is stimulated only the first time the onSignal input is.&#x0A;&#x0A;It will be reset by the onInit signal." x="128" y="55"><bitmap>media/images/box/loop.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bFirstTime = True
+
+    def onUnload(self):
+        self.bFirstTime = True
+
+    def onInput_onSignal(self):
+        if( self.bFirstTime ):
+            self.bFirstTime = False
+            self.firstTime()
+
+    def onInput_onInit(self):
+        self.bFirstTime = True]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onSignal" type="1" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" /><Input name="onInit" type="1" type_size="1" nature="1" inner="0" tooltip="It resets the state." id="3" /><Output name="firstTime" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="4" /></Box><Box name="Only Once With Init (1)" id="2" localization="8" tooltip="This box&apos;s output is stimulated only the first time the onSignal input is.&#x0A;&#x0A;It will be reset by the onInit signal." x="121" y="210"><bitmap>media/images/box/loop.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self, False)
+
+    def onLoad(self):
+        self.bFirstTime = True
+
+    def onUnload(self):
+        self.bFirstTime = True
+
+    def onInput_onSignal(self):
+        if( self.bFirstTime ):
+            self.bFirstTime = False
+            self.firstTime()
+
+    def onInput_onInit(self):
+        self.bFirstTime = True]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onSignal" type="1" type_size="1" nature="1" inner="0" tooltip="The signal that must pass only once." id="2" /><Input name="onInit" type="1" type_size="1" nature="1" inner="0" tooltip="It resets the state." id="3" /><Output name="firstTime" type="1" type_size="1" nature="2" inner="0" tooltip="Signal sent first time the onSignal input is stimulated." id="4" /></Box><Box name="Raise Event" id="4" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="903" y="286"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="TwitterApp/Control/Recognition" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Box name="Raise Event (1)" id="8" localization="8" tooltip="Stores in NAOqi&apos;s shared memory the given value at the given key, and spreads the event to all its subscribers." x="940" y="116"><bitmap>media/images/box/sensors/STM.png</bitmap><script language="4"><content><![CDATA[class MyClass(GeneratedClass):
+    def __init__(self):
+        GeneratedClass.__init__(self)
+        pass
+
+    def onLoad(self):
+        self.memory = ALProxy("ALMemory")
+
+    def onUnload(self):
+        self.memory = None
+
+    def onInput_onStart(self, p):
+        self.memory.raiseEvent(self.getParameter("key"), p)
+        self.onStopped(p)
+
+    def onInput_onStop(self):
+        self.onUnload() #~ it is recommended to call onUnload of this box in a onStop method, as the code written in onUnload is used to stop the box as well
+        pass]]></content></script><Input name="onLoad" type="1" type_size="1" nature="0" inner="1" tooltip="Signal sent when diagram is loaded." id="1" /><Input name="onStart" type="0" type_size="1" nature="2" inner="0" tooltip="Receives the value to be inserted as an event in ALMemory." id="2" /><Input name="onStop" type="1" type_size="1" nature="3" inner="0" tooltip="Box behavior stops when a signal is received on this input." id="3" /><Output name="onStopped" type="0" type_size="1" nature="1" inner="0" tooltip="Signal sent when box behavior is finished. It contains the inserted value in ALMemory." id="4" /><Output name="onError" type="3" type_size="1" nature="1" inner="0" tooltip="Output when error is raised by the behavior. Contains the error message." id="5" /><Parameter name="key" inherits_from_parent="0" content_type="3" value="TwitterApp/Control/NoRecognition" default_value="MyApplication/MyData" custom_choice="0" tooltip="" id="6" /></Box><Link inputowner="5" indexofinput="2" outputowner="13" indexofoutput="3" /><Link inputowner="9" indexofinput="2" outputowner="15" indexofoutput="3" /><Link inputowner="6" indexofinput="2" outputowner="9" indexofoutput="4" /><Link inputowner="3" indexofinput="2" outputowner="5" indexofoutput="4" /><Link inputowner="3" indexofinput="2" outputowner="9" indexofoutput="4" /><Link inputowner="1" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="13" indexofinput="2" outputowner="1" indexofoutput="4" /><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="5" /><Link inputowner="15" indexofinput="2" outputowner="2" indexofoutput="4" /><Link inputowner="2" indexofinput="3" outputowner="6" indexofoutput="7" /><Link inputowner="2" indexofinput="3" outputowner="6" indexofoutput="6" /><Link inputowner="2" indexofinput="3" outputowner="6" indexofoutput="5" /><Link inputowner="8" indexofinput="2" outputowner="6" indexofoutput="5" /><Link inputowner="4" indexofinput="2" outputowner="6" indexofoutput="6" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box><Link inputowner="17" indexofinput="2" outputowner="2" indexofoutput="5" /><Link inputowner="4" indexofinput="2" outputowner="17" indexofoutput="4" /><Link inputowner="10" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="2" indexofinput="2" outputowner="0" indexofoutput="2" /><Link inputowner="4" indexofinput="2" outputowner="0" indexofoutput="4" /><Link inputowner="14" indexofinput="2" outputowner="11" indexofoutput="4" /><Link inputowner="11" indexofinput="2" outputowner="0" indexofoutput="5" /><Link inputowner="18" indexofinput="2" outputowner="14" indexofoutput="4" /><Link inputowner="19" indexofinput="2" outputowner="2" indexofoutput="3" /><Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="5" /><Link inputowner="0" indexofinput="6" outputowner="1" indexofoutput="4" /><Link inputowner="1" indexofinput="2" outputowner="4" indexofoutput="3" /><Link inputowner="7" indexofinput="2" outputowner="2" indexofoutput="3" /></Diagram></BehaviorKeyframe></BehaviorLayer></Timeline></Box></ChoregrapheProject>

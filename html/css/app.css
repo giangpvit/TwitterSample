@@ -1,0 +1,31 @@
+
+ .btn-voice {
+  background-image: url('../images/voice-default.png');
+  background-size: 30px 30px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  width: 30px;
+  height: 30px;
+}
+
+.btn-search {
+ background-image: url('../images/search.png');
+ background-size: 30px 30px;
+ background-repeat: no-repeat;
+ background-position: center center;
+ width: 30px;
+ height: 30px;
+}
+
+#loading-div{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translateY(-50%) translateX(-50%);
+    -webkit- transform: translateY(-50%) translateX(-50%);
+}
+
+.loader-img {
+  width: 80px;
+  height: 80px;
+}

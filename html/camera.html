@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Twitter</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
+
+    <style type="text/css">
+      .test_camara_backgroundBlack {
+
+      }
+      .test_camara {
+        margin-top: 20px;
+        height: 480px;
+        width: 640px;
+        /* background-color: black;*/
+      }
+      .img-center {
+        margin-top: 20px !important;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translateY(-50%) translateX(-50%);
+        -webkit- transform: translateY(-50%) translateX(-50%);
+      }
+    </style>
+</head>
+
+<body>
+    <div class="container" id="takePhoto">
+      <div class="form-row text-center">
+        <div class="col-12">
+          <canvas class="pepper_image test_camara"></canvas><br>
+        </div>
+        <div class="col-12">
+            <button id="btn-camera" class="btn btn-primary" style="margin-top:30px;"><i class="fa fa-camera"></i></button>
+        </div>
+      </div>
+      <button id="btn-arrow-up" class="btn btn-primary" style="position: fixed; bottom: 350px; right: 20px;"><i class="fa fa-arrow-up"></i></button>
+      <button id="btn-arrow-down" class="btn btn-primary" style="position: fixed; bottom: 250px; right: 20px;"><i class="fa fa-arrow-down"></i></button>
+      <button id="btn-back" class="btn btn-primary" style="position: fixed; bottom: 20px; left: 20px;">戻る</button>
+    </div>
+    <div class="container" id="postPage">
+        <div class="row" style="margin-top: 10px !important;">
+          <div class="col-8">
+                <input id="input-post" type="text" class="form-control input-lg" placeholder="いまどうしてる" style="height: 100px;">
+                <!-- </div> -->
+          </div>
+          <div class="col-4" style="margin-top: 20px !important;">
+            <!-- <div class="float-left" style="margin-top: 20px !important;"> -->
+              <button id="btn-voice" class="btn btn-primary" style="margin-left: 5px !important;" data-toggle="modal" data-target="#myModal"><i class="fa fa-microphone"></i></button>
+              <button id="btn-postStatus" class="btn btn-primary">Post</button>
+            <!-- </div> -->
+          </div>
+        </div>
+        <div class="img-center">
+            <img id="img-post" src="" style="height: 350px;width:467px;"></img>
+        </div>
+        <button id="btn-post-back" class="btn btn-primary" style="position: fixed; bottom: 20px; left: 20px;">戻る</button>
+    </div>
+    <!-- The Modal -->
+    <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+          <!-- Modal content -->
+          <div class="modal-content">
+            <div class="modal-header">
+              <p id="modalContent">お話しください</p>
+            </div>
+            <div class="modal-footer">
+                  <button id="btn-post-back"　type="button" class="btn btn-secondary" data-dismiss="modal" style="display: none;">戻る</button>
+                  <button type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+              </div>
+          </div>
+
+        </div>
+      </div>
+    <button id="btn-stop" class="btn btn-primary" style="position: fixed; bottom: 20px; right: 20px;">終了</button>
+    <!-- SCRIPTS -->
+    <!-- JQuery -->
+    <script src="/libs/qimessaging/1.0/qimessaging.js"></script>
+    <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="js/mdb.min.js"></script>
+    <script>
+    // 開始/終了時にメッセージ表示
+    (function($){
+    	var pepper = {};
+      // ,
+    	// 	$debug = $('#debug');
+      $("#takePhoto").show();
+      $("#postPage").hide();
+    	pepper.qi = new QiSession();
+
+      $("#btn-back").on('click touchstart', function () {
+          window.location.href = 'index.html';
+      });
+
+      $("#btn-post-back").on('click touchstart', function () {
+          $("#postPage").hide();
+          $("#img-post").attr("src","");
+          setTimeout(function(){
+            $("#takePhoto").show();
+            startPreview();
+          }, 500);
+      });
+
+      $("#btn-stop").on('click touchstart', function () {
+        pepper.qi.service("ALMemory").done(function (ALMemory) {
+            ALMemory.raiseEvent("TwitterApp/Stop", "Stop");
+        });
+      });
+
+      $("#btn-camera").on('click touchstart', function () {
+        pepper.qi.service("ALMemory").done(function (ALMemory) {
+            ALMemory.raiseEvent("TwitterApp/TakePhoto", "TakePhoto");
+            // processing = true;
+        });
+      });
+      var positionHead = 4;
+      $("#btn-arrow-up").on('click touchstart', function () {
+        $("#btn-arrow-up").prop('disabled', true);
+        setTimeout(function(){
+            $("#btn-arrow-up").prop('disabled', false);
+            positionHead -=1;
+            if (positionHead == 0) {
+              $("#btn-arrow-up").prop('disabled', true);
+            }
+            if (positionHead < 7) {
+              $("#btn-arrow-down").prop('disabled', false);
+            }
+            pepper.qi.service("ALMemory").done(function (ALMemory) {
+                ALMemory.raiseEvent("TwitterApp/Control/AdjustHead", positionHead);
+                // processing = true;
+            });
+          }, 500);
+      });
+      $("#btn-arrow-down").on('click touchstart', function () {
+          $("#btn-arrow-down").prop('disabled', true);
+        setTimeout(function(){
+          $("#btn-arrow-down").prop('disabled', false);
+          positionHead +=1;
+          if (positionHead > 0) {
+            $("#btn-arrow-up").prop('disabled', false);
+          }
+          if (positionHead == 7) {
+            $("#btn-arrow-down").prop('disabled', true);
+          }
+          pepper.qi.service("ALMemory").done(function (ALMemory) {
+              ALMemory.raiseEvent("TwitterApp/Control/AdjustHead", positionHead);
+              // processing = true;
+          });
+        }, 300);
+      });
+
+      $("#btn-postStatus").on('click touchstart', function () {
+        // alert("btn-postStatus");
+        var str = $("#input-post").val();
+        pepper.qi.service("ALMemory").done(function (ALMemory) {
+            ALMemory.raiseEvent("TwitterApp/PostStatus", str);
+            // processing = true;
+        });
+      });
+
+      $("#btn-voice").on('click touchstart', function () {
+        // if(processing == false) {
+          pepper.qi.service("ALMemory").done(function (ALMemory) {
+              ALMemory.raiseEvent("TwitterApp/View/Voice", "Voice");
+              // processing = true;
+          });
+
+      });
+
+      $("#btn-modal-close").on('click touchstart', function () {
+        pepper.qi.service("ALMemory").done(function (ALMemory) {
+            ALMemory.raiseEvent("TwitterApp/Control/StopVoice", "Stop");
+        });
+      });
+    	// メモリ取得
+      pepper.qi.service("ALMemory").done(function (ALMemory) {
+        ALMemory.subscriber("TwitterApp/stopPreview").done(function (subscriber) {
+          subscriber.signal.connect(function (value) {
+            // alert(value);
+            stopPreview();
+            $("#takePhoto").hide();
+            $("#img-post").attr("src",value);
+            $("#postPage").show();
+          });
+        });
+      });
+      pepper.qi.service("ALMemory").done(function (ALMemory) {
+        ALMemory.subscriber("TwitterApp/Control/Recognition").done(function (subscriber) {
+          subscriber.signal.connect(function (value) {
+            // alert(value);
+            $("#modalContent").text(value);
+            $("#input-search").val(value);
+
+            setTimeout(function() {
+                $("#myModal").modal('hide');
+                $("#modalContent").text('お話しください');
+            }, 3000);
+          });
+        });
+
+        ALMemory.subscriber("TwitterApp/Control/NoRecognition").done(function (subscriber) {
+          subscriber.signal.connect(function (value) {
+            $("#modalContent").text(value);
+            // Tapper.utl.raiseEvent("YoutubePlayer/View/Search", id);
+
+            setTimeout(function() {
+                $("#myModal").modal('hide');
+                $("#modalContent").text('お話しください');
+            }, 3000);
+          });
+        });
+        ALMemory.subscriber("TwitterApp/Control/Processing").done(function (subscriber) {
+          subscriber.signal.connect(function (value) {
+            $("#modalContent").text(value);
+          });
+        });
+      });
+    	pepper.qi.service('ALMemory').done(function(ALMemory){
+    		// $debug.append('memory<br>');
+    		// イベント登録
+
+        ALMemory.subscriber('TwitterApp/PostPage/showNotify').done(function(sub){
+    			// $debug.append('startPreview:subscribe<br>');
+    			sub.signal.connect(function(st){
+            $("#modalContent").text(st);
+            $("#btn-post-back").css("display", "block");
+            $("#myModal").modal('show');
+    			});
+
+    		}).fail(onError);
+    		ALMemory.subscriber('startPreview').done(function(sub){
+    			// $debug.append('startPreview:subscribe<br>');
+    			sub.signal.connect(function(st){
+    				// $debug.append('start<br>');
+    				startPreview();
+    			});
+    		}).fail(onError);
+    		ALMemory.subscriber('stopPreview').done(function(sub){
+    			// $debug.append('stopPreview:subscribe<br>');
+    			sub.signal.connect(function(st){
+    				// $debug.append('stop<br>');
+            alert(st)
+    				stopPreview();
+    			});
+    		}).fail(onError);
+    	}).fail(onError);
+
+    	function startPreview() {
+    		pepper.qi.service('ALVideoDevice').done(function(ALVideoDevice){
+    			pepper.video = ALVideoDevice;
+          var capture = "";
+          var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+          for (var i = 0; i < 10; i++)
+            capture += possible.charAt(Math.floor(Math.random() * possible.length));
+    			pepper.video.subscribeCamera(
+    				capture,
+    				0, // cameraId kTop kBottom kInfred(color:17)
+    				1, // 320x240 8,7,0,1,2,3
+    				0, // 0:monochrome, 9:YUV, 11:RGB http://doc.aldebaran.com/2-1/family/robots/video_robot.html#cameracolorspace-mt9m114
+    				10 // framerate 1~30
+    			).done(function(res){
+    				pepper.video.id = res;
+    				// $debug.append(res + '<br>');
+    				var $cvs = $('.pepper_image');
+
+    				// 画像の取得
+    				function getPicture() {
+    					pepper.video
+    						.getImageRemote(pepper.video.id)
+    						.done(function(res){
+    							drawCaptureImage(res, $cvs);
+    							setTimeout(getPicture, 10);
+    						});
+    				}
+    				getPicture();
+    			});
+    		}).fail(onError);
+    	}
+
+    	function stopPreview() {
+    		if (pepper.video && pepper.video.id) {
+    			pepper.video.unsubscribe(pepper.video.id);
+    		}
+    	}
+
+    	// カメラ画像の描画
+    	function drawCaptureImage(res, $cvs, timer) {
+    		// [0]: width.
+    		// [1]: height.
+    		// [2]: number of layers.
+    		// [3]: ColorSpace.
+    		// [4]: time stamp (seconds).
+    		// [5]: time stamp (micro-seconds).
+    		// [6]: binary array of size height * width * nblayers containing image data.
+    		// [7]: camera ID (kTop=0, kBottom=1).
+    		// [8]: left angle (radian).
+    		// [9]: topAngle (radian).
+    		// [10]: rightAngle (radian).
+    		// [11]: bottomAngle (radian).
+    		//console.log(res);
+    		var w = res[0], h = res[1], nb = res[2],
+    			binary = window.atob(res[6]),
+    			len = binary.length, m = len/nb;
+
+    		//console.log(len);
+    		// $cvs.attr({width: w, height: h}).css({width: w, height: h});
+
+    		var ctx = $cvs[0].getContext('2d');
+
+    		var img = ctx.createImageData(w, h);
+    		var pixs = img.data;
+
+    		if (res[3] === 0 || res[3] === 17) { // monochrome
+    			for (var i = 0; i < m; i++) {
+    				pixs[i*4] = pixs[i*4+1] = pixs[i*4+2] = binary.charCodeAt(i*nb);
+    				pixs[i*4+3] = 255;
+    			}
+    		} else if (res[3] === 11) { // RGB
+    			for (var i = 0; i < m; i++) {
+    				pixs[i*4] = binary.charCodeAt(i*nb);
+    				pixs[i*4+1] = binary.charCodeAt(i*nb+1);
+    				pixs[i*4+2] = binary.charCodeAt(i*nb+2);
+    				pixs[i*4+3] = 255;
+    			}
+    		// TODO YUVの変換
+    		} else { // 実験用
+    			for (var i = 0; i < m; i++) {
+    				pixs[i*4] = binary.charCodeAt(i*nb);
+    				if (nb > 1) {
+    					pixs[i*4+1] = binary.charCodeAt(i*nb+1);
+    				} else {
+    					pixs[i*4+1] = pixs[i*4];
+    				}
+    				if (nb > 2) {
+    					pixs[i*4+2] = binary.charCodeAt(i*nb+2);
+    				} else {
+    					pixs[i*4+2] = pixs[i*4];
+    				}
+    				pixs[i*4+3] = 255;
+    			}
+    		}
+
+    		ctx.putImageData(img, 0, 0);
+        // ctx.scale(1.5, 1.5);
+        // ctx.drawImage($cvs, 0, 0);
+    	}
+
+    })(jQuery);
+    </script>
+</body>
+
+</html>

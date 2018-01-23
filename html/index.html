@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>Twitter</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <!-- Material Design Bootstrap -->
+    <link href="css/mdb.min.css" rel="stylesheet">
+    <!-- Your custom styles (optional) -->
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/app.css" rel="stylesheet">
+</head>
+
+<body>
+    <div class="row" style="margin-top: 30px !important;">
+      <div class="col-2">
+        <div class="float-right">
+          <img src="images/Twitter_logo_blue.png" style="width: 80px; height: 80px;" alt="placeholder.">
+        </div>
+      </div>
+      <div class="col-6">
+            <form id="index-search">
+              <input id="input-search" type="text" class="form-control input-lg" placeholder="検索" name="search">
+            </form>
+      </div>
+      <div class="col-4">
+          <!-- <div class="input-group-btn"> -->
+          <button id="btn-voice" class="btn btn-primary" style="margin-left: 5px !important;" data-toggle="modal" data-target="#myModal"><i class="fa fa-microphone"></i></button>
+          <!-- </div> -->
+          <!-- <div class="input-group-btn"> -->
+          <button id="btn-search" class="btn btn-primary"><i class="fa fa-search"></i></button>
+          <button id="btn-camera" class="btn btn-primary"><i class="fa fa-camera"></i></button>
+          <!-- </div> -->
+      </div>
+    </div>
+  <div class="container">
+    <button id="btn-collapse" class="btn btn-primary" type="button" aria-expanded="false" aria-controls="collapseExample">
+        オプション
+    </button>
+    <div class="collapse" id="collapseExample">
+      <div class="btn-group">
+        <button id="btn-dropdownMenuAccount" class="btn btn-primary dropdown-toggle" style="margin-left: 6px !important;" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+          すべてのアカウント
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuAccount" id="dropdownMenuAccount">
+            <a class="dropdown-item active" href="#">すべてのアカウント</a>
+            <a class="dropdown-item" href="#">フォローしているユーザーのみ</a>
+        </div>
+      </div>
+
+      <div class="btn-group">
+        <button id="btn-dropdownMenuTime"  class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          期間指定なし
+        </button>
+        <div class="dropdown-menu" aria-labelledby="dropdownMenuTime" id="dropdownMenuTime">
+            <a class="dropdown-item active" href="#">期間指定なし</a>
+            <a class="dropdown-item" href="#">5 分間</a>
+            <a class="dropdown-item" href="#">10 分間</a>
+            <a class="dropdown-item" href="#">30 分間</a>
+            <a class="dropdown-item" href="#">1 時間</a>
+            <a class="dropdown-item" href="#">10 時間</a>
+        </div>
+      </div>
+      <div class="btn-group">
+        <button id="btn-dropdownMenuTalk" class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">
+          喋らない
+        </button>
+        <div id="dropdownMenuTalk" class="dropdown-menu" aria-labelledby="dropdownMenuTalk">
+            <a class="dropdown-item active" href="#">喋らない</a>
+            <a class="dropdown-item" href="#">喋る</a>
+        </div>
+      </div>
+    </div>
+  </div>
+   <!-- visibility: hidden; -->
+  <div class="container" style="margin-top: 20px !important;">
+      <!--ul list-->
+    <div id="tweets-div">
+      <ul id="tweets-liv" class="list-group" style="display:none;">
+
+      </ul><!--ul tweets-liv-->
+    </div>
+  </div>
+  <div id="loading-div" style="display:none;">
+    <img class="loader-img" src="images/loading.gif" alt="Loading.." />
+  </div>
+  <!-- The Modal -->
+  <div id="myModal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <!-- Modal content -->
+        <div class="modal-content">
+          <div class="modal-header">
+            <p id="modalContent">お話しください</p>
+          </div>
+          <div class="modal-footer">
+                <button id="btn-modal-close" type="button" class="btn btn-primary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+
+      </div>
+    </div>
+    <button id="btn-stop" class="btn btn-primary" style="position: fixed; bottom: 20px; right: 20px;">終了</button>
+    <!-- SCRIPTS -->
+    <!-- JQuery -->
+    <script src="/libs/qimessaging/1.0/qimessaging.js"></script>
+    <script type="text/javascript" src="js/jquery-3.2.1.min.js"></script>
+    <!-- Bootstrap tooltips -->
+    <script type="text/javascript" src="js/popper.min.js"></script>
+    <!-- Bootstrap core JavaScript -->
+    <script type="text/javascript" src="js/bootstrap.min.js"></script>
+    <!-- MDB core JavaScript -->
+    <script type="text/javascript" src="js/mdb.min.js"></script>
+    <!-- <script src="js/tapper.js"></script> -->
+    <script>
+      var session = new QiSession();
+
+      $(document).ready(function(){
+        $("#input-search").val("テック");
+        $("#loading-div").hide();
+        $("#tweets-liv").hide();
+        $("#dropdownMenu4").prop('disabled', true);
+        session.service("ALMemory").done(function (ALMemory) {
+            ALMemory.raiseEvent("TwitterApp/Start", "Yes");
+        });
+        $("#btn-collapse").on('click touchstart', function(){
+          $("#collapseExample").collapse('toggle');
+        });
+
+        $("#dropdownMenuAccount a").on('click touchstart', function(){
+            $("#btn-dropdownMenuAccount").text($(this).closest('a').text());
+            var selected_index = null;
+            var selected_index = $(this).closest('a').index();
+            $(this).addClass('active').siblings().removeClass('active');
+            session.service("ALMemory").done(function (ALMemory) {
+                $("#loading-div").show();
+                $("#tweets-div ul").empty();
+                ALMemory.raiseEvent("TwitterApp/View/ChangeListView", selected_index);
+            });
+        });
+
+        $("#dropdownMenuTime a").on('click touchstart', function(){
+            $("#btn-dropdownMenuTime").text($(this).closest('a').text());
+            var selected_index = null;
+            var selected_index = $(this).closest('a').index();
+            $(this).addClass('active').siblings().removeClass('active');
+            session.service("ALMemory").done(function (ALMemory) {
+                $("#loading-div").show();
+                $("#tweets-div ul").empty();
+                ALMemory.raiseEvent("TwitterApp/View/updateTweet", selected_index);
+            });
+        });
+
+        $("#dropdownMenuTalk a").on('click touchstart', function(){
+            $("#btn-dropdownMenuTalk").text($(this).closest('a').text());
+            var selected_index = null;
+            var selected_index = $(this).closest('a').index();
+            $(this).addClass('active').siblings().removeClass('active');
+            session.service("ALMemory").done(function (ALMemory) {
+                if (selected_index == 0) {
+                  ALMemory.raiseEvent("TwitterApp/stopReadingTweet", selected_index);
+                }
+                if (selected_index == 1) {
+                  ALMemory.raiseEvent("TwitterApp/readTweet", selected_index);
+                }
+            });
+        });
+
+        $("#index-search").submit(function() {
+          var str = $("#input-search").val();
+          if(str.length > 0) {
+            session.service("ALMemory").done(function (ALMemory) {
+                $("#loading-div").show();
+                $("#tweets-div ul").empty();
+                ALMemory.raiseEvent("TwitterApp/View/Search", str);
+            });
+          }
+        });
+
+        $("#btn-search").on('click touchstart', function () {
+          var str = $("#input-search").val();
+          $("#btn-search").prop('disabled', true);
+          setTimeout(function(){
+            $("#btn-search").prop('disabled', false);
+            if(str.length > 0) {
+              session.service("ALMemory").done(function (ALMemory) {
+                  $("#loading-div").show();
+                  $("#tweets-div ul").empty();
+                  ALMemory.raiseEvent("TwitterApp/View/Search", str);
+              });
+            }
+          }, 1000);
+        });
+
+        $("#btn-voice").on('click touchstart', function () {
+          // if(processing == false) {
+            session.service("ALMemory").done(function (ALMemory) {
+                ALMemory.raiseEvent("TwitterApp/View/Voice", "Voice");
+                // processing = true;
+            });
+
+        });
+
+        $("#btn-camera").on('click touchstart', function () {
+          // if(processing == false) {
+            session.service("ALMemory").done(function (ALMemory) {
+                ALMemory.raiseEvent("TwitterApp/View/ShowCamera", "Voice");
+                window.location.href = 'camera.html';
+                // processing = true;
+            });
+
+        });
+
+        $("#btn-stop").on('click touchstart', function () {
+          session.service("ALMemory").done(function (ALMemory) {
+              ALMemory.raiseEvent("TwitterApp/Stop", "Stop");
+          });
+        });
+
+        $("#btn-modal-close").on('click touchstart', function () {
+          session.service("ALMemory").done(function (ALMemory) {
+              ALMemory.raiseEvent("TwitterApp/Control/StopVoice", "Stop");
+          });
+        });
+        // var btn_close = document.getElementsByClassName("close")[0];
+        // // When the user clicks on <span> (x), close the modal
+        // btn_close.onclick = function() {
+        //   // if(processing == true) {
+        //     session.service("ALMemory").done(function (ALMemory) {
+        //         ALMemory.raiseEvent("TwitterApp/View/Voice", "Voice");
+        //     });
+        //     Tapper.utl.raiseEvent("TwitterApp/Control/StopVoice", "Stop");
+        //     modal.style.display = "none";
+        //     var str = $("#input-search").val();
+        //     $("#input-search").val(str);
+        //   // }
+        // }
+        session.service("ALMemory").done(function (ALMemory) {
+
+          ALMemory.subscriber("TwitterApp/updateLiBackgroundColor").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+              // alert(value);
+              var id = String(value;
+              $(id).css("background-color","yellow");
+            });
+          });
+
+          ALMemory.subscriber("TwitterApp/Control/Recognition").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+              // alert(value);
+              $("#modalContent").text(value);
+              $("#input-search").val(value);
+              setTimeout(function() {
+                  $("#myModal").modal('hide');
+                  $("#modalContent").text('お話しください');
+              }, 3000);
+            });
+          });
+
+          ALMemory.subscriber("TwitterApp/Control/NoRecognition").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+
+              $("#modalContent").text(value);
+              // Tapper.utl.raiseEvent("YoutubePlayer/View/Search", id);
+              setTimeout(function() {
+                  $('#myModal').modal('hide');
+                  // $("#modalContent").text('お話しください');
+              }, 3000);
+            });
+          });
+          ALMemory.subscriber("TwitterApp/Control/Processing").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+
+              $("#modalContent").text(value);
+            });
+          });
+        });
+
+        session.service("ALMemory").done(function (ALMemory) {
+          ALMemory.subscriber("TwitterApp/UpdateTweetsListView").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+              // alert(value);
+              // $("#tweets-div ul").append(value);
+              $('#tweets-liv').html(value);
+            });
+          });
+
+          ALMemory.subscriber("TwitterApp/ResetView").done(function (subscriber) {
+            subscriber.signal.connect(function (value) {
+              // alert(value);
+              $("#loading-div").hide();
+              $("#tweets-div ul").empty();
+              $("#tweets-liv").show();
+              $("#dropdownMenu4").prop('disabled', false);
+            });
+          });
+
+        });
+      });
+    </script>
+</body>
+
+</html>
